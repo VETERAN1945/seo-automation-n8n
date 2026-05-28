@@ -1,0 +1,562 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        352,
+        176
+      ],
+      "id": "c70ab64a-faa6-4c78-ab01-95296daa5916",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1L7-3bGx_oHIt2Q7RwOW6ZgaDZsIcd1Y12jc4s-3TGO8/edit?gid=402365620#gid=402365620",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 402365620,
+          "mode": "list",
+          "cachedResultName": "в какие колонки вставим",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L7-3bGx_oHIt2Q7RwOW6ZgaDZsIcd1Y12jc4s-3TGO8/edit#gid=402365620"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        432,
+        384
+      ],
+      "id": "5a3be2fb-820b-43e5-be39-273a20d6804b",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MAWh5pMaz3eedzKO",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://serpapi.com/search.json?engine=google&q={{ $json.Keyword }}&gl={{ $json.GEO.toLowerCase() }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        736,
+        64
+      ],
+      "id": "d4774a42-ba59-4854-917b-fe6283fc9b48",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "xreDLCIw9GUqdv5t",
+          "name": "Query Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1L7-3bGx_oHIt2Q7RwOW6ZgaDZsIcd1Y12jc4s-3TGO8/edit?gid=402365620#gid=402365620",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 402365620,
+          "mode": "list",
+          "cachedResultName": "в какие колонки вставим",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L7-3bGx_oHIt2Q7RwOW6ZgaDZsIcd1Y12jc4s-3TGO8/edit#gid=402365620"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Keyword": "={{ $('Code in JavaScript2').item.json.keyword }}",
+            "Result": "=https://docs.google.com/document/d/{{ $json.documentId }}/edit"
+          },
+          "matchingColumns": [
+            "Keyword"
+          ],
+          "schema": [
+            {
+              "id": "Keyword",
+              "displayName": "Keyword",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "GEO",
+              "displayName": "GEO",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Language",
+              "displayName": "Language",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Result",
+              "displayName": "Result",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2416,
+        432
+      ],
+      "id": "3809587e-bef9-4134-8e5f-236b0a97f97b",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MAWh5pMaz3eedzKO",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "\nconst results = $json.organic_results || [];\nconst targets = [];\n\n\nconst blacklist = [\n  'google.com', \n  'youtube.com', \n  'play.google.com', \n  'apple.com', \n  'trustpilot.com', \n  'wikipedia.org'\n];\n\nfor (let item of results) {\n  \n  if (item.position > 10) break; \n  \n  \n  if (targets.length === 3) break;\n\n  const url = item.link;\n  \n \n  const isBlacklisted = blacklist.some(domain => url.includes(domain));\n  \n  if (!isBlacklisted) {\n    targets.push({\n      position: item.position,\n      title: item.title,\n      link: url\n    });\n  }\n}\n\n\nreturn { \n  keyword: $node[\"Get row(s) in sheet\"].json.Keyword,\n  geo: $node[\"Get row(s) in sheet\"].json.GEO,\n  language: $node[\"Get row(s) in sheet\"].json.Language,\n  competitors: targets \n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        384
+      ],
+      "id": "1b55a9ff-7cdd-48c1-9a33-fd400b1148f5",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "competitors",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        144
+      ],
+      "id": "4493ba92-087d-45af-930e-b4faffc3f258",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.competitors.link }}",
+        "options": {
+          "allowUnauthorizedCerts": true
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1280,
+        144
+      ],
+      "id": "9fb59bc4-36b3-4174-82fe-b0bfefc8c2ed",
+      "name": "HTTP Request1",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all(); // Данные, пришедшие из HTTP Request (HTML или ошибки)\nconst originalItems = $(\"Split Out\").all(); // Заглядываем назад в Split Out за оригинальными данными\nconst processedItems = [];\n\nfor (let i = 0; i < items.length; i++) {\n  const item = items[i];\n  const orig = originalItems[i].json; // Берем сохраненные данные: keyword, geo и т.д.\n  \n  // Восстанавливаем потерянные колонки\n  const competitorsData = orig.competitors || {};\n  const baseData = {\n    keyword: orig.keyword || '',\n    geo: orig.geo || '',\n    language: orig.language || '',\n    position: competitorsData.position || '',\n    competitor_title: competitorsData.title || '',\n    link: competitorsData.link || ''\n  };\n\n  // Пытаемся найти HTML-код (n8n может прятать его в разных свойствах)\n  let html = '';\n  if (typeof item.json === 'string') {\n    html = item.json;\n  } else {\n    html = item.json.data || item.text || JSON.stringify(item.json) || '';\n  }\n\n  // Проверяем, не вернул ли узел ошибку\n  const hasError = item.json.error || html.includes('Error') || html.length < 100;\n\n  if (hasError || !html) {\n    processedItems.push({\n      json: {\n        ...baseData,\n        h1: 'Ошибка парсинга',\n        meta_title: 'Ошибка парсинга',\n        meta_description: 'Ошибка парсинга'\n      }\n    });\n    continue;\n  }\n\n  // 1. Вытаскиваем <title>\n  const titleMatch = html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i);\n  const meta_title = titleMatch ? titleMatch[1].trim() : 'Не найден';\n\n  // 2. Вытаскиваем Description\n  const descMatch = html.match(/<meta[^>]+name=[\"']description[\"'][^>]+content=[\"']([\\s\\S]*?)[\"']/i) || \n                    html.match(/<meta[^>]+content=[\"']([\\s\\S]*?)[\"'][^>]+name=[\"']description[\"']/i);\n  const meta_description = descMatch ? descMatch[1].trim() : 'Не найден';\n\n  // 3. Вытаскиваем H1\n  const h1Match = html.match(/<h1[^>]*>([\\s\\S]*?)<\\/h1>/i);\n  const h1 = h1Match ? h1Match[1].replace(/<[^>]*>/g, '').trim() : 'Не найден';\n\n  processedItems.push({\n    json: {\n      ...baseData,\n      h1: h1 || 'Не найден',\n      meta_title: meta_title || 'Не найден',\n      meta_description: meta_description || 'Не найден'\n    }\n  });\n}\n\nreturn processedItems;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        144
+      ],
+      "id": "e8a2ea35-ae7f-4ced-bf90-d70195a405fb",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=TARGET KEYWORD: {{ $json.keyword }}\nGEO: {{ $json.geo }}\nLANGUAGE: {{ $json.language }}\n\nCOMPETITOR:\nPosition: {{ $json.position }}\nSite: {{ $json.link }}\nTitle: {{ $json.competitor_title }}\nH1: {{ $json.h1 }}\nMeta Title: {{ $json.meta_title }}\nMeta Description: {{ $json.meta_description }}\n\nRULES:\n1. H1 and Meta Title MUST START with: {{ $json.keyword }}\n2. NO emojis. FORBIDDEN: Discover, Thrilling, Enjoy, Excitement\n3. Meta Title: 40-60 characters\n4. Meta Description: under 160 characters\n5. Capitalize ALL words in Title\n6. Write in language: {{ $json.language }}\n\nReturn ONLY this JSON:\n{\"h1\": \"...\", \"meta_title\": \"...\", \"meta_description\": \"...\"}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a professional SEO specialist.  Always respond ONLY with valid JSON, no markdown, no explanation."
+            }
+          ]
+        },
+        "batching": {
+          "batchSize": 3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1344,
+        400
+      ],
+      "id": "f8ee0910-8112-4007-a9f2-fa122b087298",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1472,
+        688
+      ],
+      "id": "55a80362-1e04-4f60-a958-c226577ae187",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "o1RQec5iyZD8bJoU",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const aiItems = $('Basic LLM Chain').all(); // берём AI ответы по имени\nconst origItems = $('Code in JavaScript1').all(); // оригинальные данные\n\nconst groups = {};\n\nfor (let i = 0; i < origItems.length; i++) {\n  const orig = origItems[i].json;\n  const aiText = aiItems[i] ? (aiItems[i].json.text || \"\") : \"\";\n  \n  let ai_h1 = \"\", ai_meta_title = \"\", ai_meta_description = \"\";\n  try {\n    const clean = aiText.replace(/```json|```/g, \"\").trim();\n    const parsed = JSON.parse(clean);\n    ai_h1 = parsed.h1 || \"\";\n    ai_meta_title = parsed.meta_title || \"\";\n    ai_meta_description = parsed.meta_description || \"\";\n  } catch(e) {}\n\n  const key = (orig.keyword || \"\") + '|' + (orig.geo || \"\");\n  \n  if (!groups[key]) {\n    groups[key] = {\n      keyword: orig.keyword,\n      geo: orig.geo,\n      language: orig.language,\n      ai_h1, ai_meta_title, ai_meta_description,\n      competitors: []\n    };\n  }\n\n  groups[key].competitors.push({\n    position: orig.position,\n    link: orig.link,\n    competitor_title: orig.competitor_title,\n    scraped_h1: orig.h1,\n    scraped_meta_title: orig.meta_title,\n    scraped_meta_description: orig.meta_description\n  });\n}\n\nreturn Object.values(groups).map(g => ({ json: g }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1712,
+        176
+      ],
+      "id": "a28b9872-7d79-4e0e-8ce6-900c67ed0076",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "folderId": "default",
+        "title": "={{ $json.keyword }}-{{ $json.geo }}"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        1904,
+        192
+      ],
+      "id": "e78bb3b2-c337-4b1d-aa68-f32eb5c3949c",
+      "name": "Create a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "Y7ex1gZkoW5apsWr",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "=Analysis for {{ $('Code in JavaScript2').item.json.keyword }} - {{ $('Code in JavaScript2').item.json.geo }}\n\nCOMPETITOR REPORTS\n\nCompetitor 1\nPosition: {{ $('Code in JavaScript2').item.json.competitors[0].position }}\nURL: {{ $('Code in JavaScript2').item.json.competitors[0].link }}\nTitle: {{ $('Code in JavaScript2').item.json.competitors[0].competitor_title }}\nMeta Title: {{ $('Code in JavaScript2').item.json.competitors[0].scraped_meta_title }}\nMeta Description: {{ $('Code in JavaScript2').item.json.competitors[0].scraped_meta_description }}\n\nCompetitor 2\nPosition: {{ $('Code in JavaScript2').item.json.competitors[1].position }}\nURL: {{ $('Code in JavaScript2').item.json.competitors[1].link }}\nTitle: {{ $('Code in JavaScript2').item.json.competitors[1].competitor_title }}\n\nCompetitor 3\nPosition: {{ $('Code in JavaScript2').item.json.competitors[2].position }}\nURL: {{ $('Code in JavaScript2').item.json.competitors[2].link }}\nTitle: {{ $('Code in JavaScript2').item.json.competitors[2].competitor_title }}\n\nOPTIMIZED SEO CONTENT\nH1: {{ $('Code in JavaScript2').item.json.ai_h1 }}\nMeta Title: {{ $('Code in JavaScript2').item.json.ai_meta_title }}\nMeta Description: {{ $('Code in JavaScript2').item.json.ai_meta_description }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        2096,
+        176
+      ],
+      "id": "2ed2aae7-2fb7-41b7-a862-9f73ad6b1ded",
+      "name": "Update a document",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "Y7ex1gZkoW5apsWr",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://www.googleapis.com/drive/v3/files/{{ $json.documentId }}/permissions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"role\": \"commenter\",\n  \"type\": \"anyone\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2048,
+        480
+      ],
+      "id": "0217045b-3666-4528-a01a-5516794e93b7",
+      "name": "HTTP Request2",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "1VQp42tJlaQ2unOB",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://docs.googleapis.com/v1/documents/{{ $json.documentId }}:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDocsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"requests\": [\n    {\n      \"updateParagraphStyle\": {\n        \"range\": {\n          \"startIndex\": 1,\n          \"endIndex\": 2\n        },\n        \"paragraphStyle\": {\n          \"namedStyleType\": \"HEADING_1\"\n        },\n        \"fields\": \"namedStyleType\"\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2352,
+        176
+      ],
+      "id": "d081ead0-af09-4826-9f15-b4347da39e8e",
+      "name": "HTTP Request3",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "Y7ex1gZkoW5apsWr",
+          "name": "Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nconst filtered = items.filter(item => {\n  const result = item.json['Result'] || \n                 item.json['result'] || \n                 \"\";\n  return result.trim() === \"\";\n});\n\nreturn filtered;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        304
+      ],
+      "id": "3e0cc872-76fd-40ab-a7c6-0606aa54dda7",
+      "name": "Code in JavaScript3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Create a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document": {
+      "main": [
+        [
+          {
+            "node": "Update a document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a document": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "ac09ae33-29ea-4b55-8e9a-99026daa84dd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6c749500e158d6044d7a961540113c154c72bb8921343a9c1d8fc8259111460b"
+  },
+  "id": "SBWgvohWZSjuMdhz",
+  "tags": []
+}
