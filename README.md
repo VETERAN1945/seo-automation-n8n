@@ -89,3 +89,4 @@
 
 - Все созданные документы открыты по ссылке с правами **Commenter**
 - Ссылки записываются в колонку **Result** исходной таблицы
+<img width="1886" height="660" alt="image" src="https://github.com/user-attachments/assets/f65457ef-fa71-4bde-b39c-682bdc23936b" />
