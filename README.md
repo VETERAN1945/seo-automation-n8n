@@ -1,0 +1,1 @@
+# seo-automation-n8n
